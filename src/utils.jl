@@ -1,0 +1,1 @@
+zerobased(array::Vector) = OffsetVector(array, 0:length(array)-1)
