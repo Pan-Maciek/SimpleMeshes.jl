@@ -15,3 +15,35 @@ function facenorm(mesh::HalfEdgeMesh, faceidx)
   ])
   normalize((B .- A) × (C .- A))
 end
+
+function itersameorigin(f, mesh::HalfEdgeMesh, idx)
+  startedge = mesh.halfedges[mesh.vertexhalfedge[idx]]
+  startface = startedge.face
+  # rotate clockwise
+  edge = startedge
+  f(edge)
+  @inbounds while edge.twin != 0
+    edge = mesh.halfedges[mesh.halfedges[edge.twin].next]
+    edge.face == startface && return # loop detected
+    f(edge)
+  end
+  # rotate counterclockwise
+  edge = mesh.halfedges[startedge.prev]
+  @inbounds while edge.twin != 0
+    edge = mesh.halfedges[edge.twin]
+    f(edge)
+    edge = mesh.halfedges[edge.prev]
+  end
+  return
+end
+
+function itersameface(f, mesh::HalfEdgeMesh, idx)
+  start = mesh.faces[idx]
+  edge = mesh.halfedges[start]
+  @inbounds while edge.next != start
+    f(edge)
+    edge = mesh.halfedges[edge.next]
+  end
+  f(edge)
+  return
+end
