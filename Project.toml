@@ -4,6 +4,5 @@ authors = ["Pan-Maciek <koziejka.com@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
