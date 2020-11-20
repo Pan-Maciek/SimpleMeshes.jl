@@ -26,9 +26,9 @@ load(path; kwargs...) = open(path, "r") do io
   ext = splitext(path)[2]
   for (format, test, targetext) in filespec
     targetext == ext || continue
-    seek(io, 0)
+    seekstart(io)
     test(io) || continue
-    seek(io, 0)
+    seekstart(io)
     return load(File{format}(io); kwargs...)
   end
 end
