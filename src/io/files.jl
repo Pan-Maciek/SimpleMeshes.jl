@@ -8,17 +8,26 @@ macro format_str(format)
   FileFormat{Symbol(format)}
 end
 
-filespec = Tuple{Type{<:FileFormat},Vector{UInt8},String}[]
+filespec = Tuple{Type{<:FileFormat},Function,String}[]
 
-add_format(format, magicbytes, ext) = push!(filespec, (format, Vector{UInt8}(magicbytes), ext))
-add_format(format, magicbytes::Vector{UInt8}, ext) = push!(filespec, (format, magicbytes, ext))
+add_format(format, test::Function, ext) = push!(filespec, (format, test, ext))
+function add_format(format, magicbytes::Vector{UInt8}, ext) 
+  len = length(magicbytes)
+  test = io -> read(io, len) == magicbytes
+  push!(filespec, (format, test, ext))
+end
+function add_format(format, magictext::String, ext)
+  lines = split(magictext, r"\r?\n")
+  test = io -> all(readline(io) == line for line in lines)
+  push!(filespec, (format, test, ext))
+end
 
 load(path; kwargs...) = open(path, "r") do io
   ext = splitext(path)[2]
-  for (format, magicbytes, targetext) in filespec
+  for (format, test, targetext) in filespec
     targetext == ext || continue
     seek(io, 0)
-    read(io, length(magicbytes)) == magicbytes || continue
+    test(io) || continue
     seek(io, 0)
     return load(File{format}(io); kwargs...)
   end
