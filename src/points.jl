@@ -20,12 +20,6 @@ struct Point{N,T} <: AbstractPoint{N,T}
   data :: NTuple{N,T}
 end
 
-const Point2{T} = Point{2,T}
-const Point3{T} = Point{3,T}
-
-const Point2f = Point{2,Float64}
-const Point3f = Point{3,Float64}
-
 function Point(x, y) 
   values = promote(x, y)
   Point{2,eltype(values)}(values)
@@ -36,4 +30,18 @@ function Point(x, y, z)
   Point{3,eltype(values)}(values)
 end
 
+using Base: unsafe_load, unsafe_convert
+
+Point{N,T}(vec::Vector{T}) where {N,T} = 
+  unsafe_load(unsafe_convert(Ptr{Point{N,T}}, vec))
+
 Base.getindex(point::Point, i) = point.data[i]
+
+struct MetaPoint{N,T,A,M} <: AbstractPoint{N,T}
+  data :: NTuple{N,T}
+  meta :: NamedTuple{A,M}
+end
+
+Base.getindex(point::MetaPoint, i) = point.data[i]
+Base.getindex(point::MetaPoint, sym::Symbol) = point.meta[sym]
+meta(point::MetaPoint) = point.meta
