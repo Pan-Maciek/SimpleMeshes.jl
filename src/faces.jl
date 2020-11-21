@@ -26,6 +26,10 @@ end
 
 Polygon{L}(array::Array) where L = Polygon{L}((array...,))
 Base.getindex(polygon::Polygon, i) = polygon.data[i]
+function Base.read(io::IO, ::Type{Polygon{N}}) where N 
+  data = read(io, N * sizeof(UInt32))
+  Base.unsafe_load(Base.unsafe_convert(Ptr{Polygon{N}}, data))
+end
 
 """
 `Triangle <: AbstractPolygon{3}`
